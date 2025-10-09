@@ -19,15 +19,15 @@ from google.genai import types
 from google.genai.types import Content
 from google.genai.types import Part
 
+from ..apps.base_events_summarizer import BaseEventsSummarizer
 from ..events.event import Event
 from ..events.event_actions import EventActions
 from ..events.event_actions import EventCompaction
 from ..models.base_llm import BaseLlm
 from ..models.llm_request import LlmRequest
-from .base_events_compactor import BaseEventsCompactor
 
 
-class LlmEventSummarizer(BaseEventsCompactor):
+class LlmEventSummarizer(BaseEventsSummarizer):
   """An LLM-based event summarizer for sliding window compaction.
 
   This class is responsible for summarizing a provided list of events into a
@@ -51,8 +51,7 @@ class LlmEventSummarizer(BaseEventsCompactor):
       ' agent. Please summarize the conversation, focusing on key'
       ' information and decisions made, as well as any unresolved'
       ' questions or tasks. The summary should be concise and capture the'
-      ' essence of the interaction. Each event is prefixed with the'
-      ' author.\\n\\n{conversation_history}'
+      ' essence of the interaction.\\n\\n{conversation_history}'
   )
 
   def __init__(
@@ -81,7 +80,7 @@ class LlmEventSummarizer(BaseEventsCompactor):
             formatted_history.append(f'{event.author}: {part.text}')
     return '\\n'.join(formatted_history)
 
-  async def maybe_compact_events(
+  async def maybe_summarize_events(
       self, *, events: list[Event]
   ) -> Optional[Event]:
     """Compacts given events and returns the compacted content.
@@ -115,8 +114,8 @@ class LlmEventSummarizer(BaseEventsCompactor):
     if summary_content is None:
       return None
 
-    # Ensure the compacted content has the role 'user'
-    summary_content.role = 'user'
+    # Ensure the compacted content has the role 'model'
+    summary_content.role = 'model'
 
     start_timestamp = events[0].timestamp
     end_timestamp = events[-1].timestamp
