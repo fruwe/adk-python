@@ -384,8 +384,8 @@ TYPE_LABELS = {
 
 
 def _schema_to_dict(schema: types.Schema) -> dict:
-  """
-  Recursively converts a types.Schema to a pure-python dict
+  """Recursively converts a types.Schema to a pure-python dict
+
   with all enum values written as lower-case strings.
 
   Args:
@@ -631,7 +631,8 @@ def _get_completion_inputs(
     llm_request: The LlmRequest to convert.
 
   Returns:
-    The litellm inputs (message list, tool dictionary, response format and generation params).
+    The litellm inputs (message list, tool dictionary, response format and
+    generation params).
   """
   # 1. Construct messages
   messages: List[Message] = []
@@ -905,7 +906,7 @@ class LiteLlm(BaseLlm):
       tools = None
 
     completion_args = {
-        "model": self.model,
+        "model": llm_request.model or self.model,
         "messages": messages,
         "tools": tools,
         "response_format": response_format,
@@ -920,6 +921,7 @@ class LiteLlm(BaseLlm):
       # Track function calls by index
       function_calls = {}  # index -> {name, args, id}
       completion_args["stream"] = True
+      completion_args["stream_options"] = {"include_usage": True}
       aggregated_llm_response = None
       aggregated_llm_response_with_tool_call = None
       usage_metadata = None
